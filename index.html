@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bethel Video Evaluatie</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-dark: #0c1929;
+    --blue-mid: #1e3a5f;
+    --blue-bright: #3b82f6;
+    --blue-light: #60a5fa;
+    --blue-pale: #93c5fd;
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-900: #0f172a;
+    --red-400: #f87171;
+    --red-500: #ef4444;
+    --red-bg: #fff5f5;
+    --red-border: #fca5a5;
+    --green-500: #10b981;
+    --green-400: #34d399;
+    --amber-400: #f59e0b;
+    --star-off: #d1d5db;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    background: linear-gradient(160deg, var(--blue-dark) 0%, var(--blue-mid) 100%);
+    min-height: 100vh;
+    padding: 20px 12px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 520px; margin: 0 auto; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 20px; }
+  .header-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px; border-radius: 14px;
+    background: linear-gradient(135deg, var(--blue-bright), var(--blue-light));
+    margin-bottom: 8px; box-shadow: 0 6px 20px rgba(59,130,246,0.4);
+    font-size: 24px;
+  }
+  .header h1 { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.01em; }
+  .header p { color: var(--slate-400); font-size: 12px; }
+
+  /* Steps bar */
+  .steps { display: flex; gap: 4px; margin-bottom: 20px; padding: 0 8px; }
+  .step { flex: 1; text-align: center; }
+  .step-bar {
+    height: 4px; border-radius: 2px; margin-bottom: 6px;
+    background: rgba(255,255,255,0.12);
+    transition: background 0.3s;
+  }
+  .step-bar.active { background: linear-gradient(90deg, var(--blue-bright), var(--blue-light)); }
+  .step-label {
+    font-size: 10px; font-weight: 600; color: var(--slate-600);
+    letter-spacing: 0.04em; text-transform: uppercase; transition: color 0.3s;
+  }
+  .step-label.active { color: var(--blue-pale); }
+
+  /* Card */
+  .card {
+    background: #fff; border-radius: 20px; padding: 24px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2); min-height: 300px;
+  }
+  .card h2 { font-size: 17px; font-weight: 800; color: var(--slate-900); margin-bottom: 16px; }
+  .card-intro { font-size: 13px; color: var(--slate-500); line-height: 1.5; margin-bottom: 14px; }
+
+  /* Fields */
+  .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    font-size: 11px; font-weight: 700; color: var(--slate-500);
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .field select, .field input[type="date"] {
+    padding: 11px 12px; border-radius: 10px; font-size: 14px;
+    border: 1.5px solid var(--slate-200); background: #fff;
+    color: var(--slate-900); outline: none; font-family: inherit;
+    width: 100%;
+  }
+  .field select:invalid, .field select option[value=""] { color: var(--slate-400); }
+
+  /* Camera card */
+  .cam-card {
+    background: #fff; border-radius: 14px; padding: 18px;
+    border: 1.5px solid var(--slate-200); margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04); transition: border-color 0.2s;
+  }
+  .cam-card.has-problem { border-color: var(--red-border); }
+  .cam-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .cam-badge {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--blue-mid), var(--blue-bright));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: 13px;
+  }
+  .cam-name { font-weight: 700; font-size: 15px; color: var(--slate-900); }
+
+  /* Stars */
+  .stars { display: flex; gap: 4px; align-items: center; }
+  .star-btn {
+    background: none; border: none; cursor: pointer; padding: 0;
+    font-size: 26px; line-height: 1; color: var(--star-off);
+    transition: color 0.15s, transform 0.15s;
+  }
+  .star-btn.active { color: var(--amber-400); transform: scale(1.15); }
+  .star-label { font-size: 12px; color: #6b7280; margin-left: 6px; font-weight: 500; min-width: 75px; }
+
+  /* Checkboxes */
+  .checks { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 4px; }
+  .check-label {
+    display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: var(--slate-500);
+  }
+  .check-label.checked { color: var(--red-500); font-weight: 600; }
+  .check-label input { width: 16px; height: 16px; accent-color: var(--red-500); }
+
+  /* Textareas */
+  textarea {
+    width: 100%; padding: 10px; border-radius: 8px; font-size: 13px;
+    border: 1.5px solid var(--slate-200); background: var(--slate-50);
+    outline: none; font-family: inherit; resize: vertical; min-height: 40px;
+  }
+  textarea.problem-field {
+    border-color: var(--red-border); background: var(--red-bg); margin-top: 6px; min-height: 44px;
+  }
+  .opmerking-area { margin-top: 10px; }
+
+  /* Summary */
+  .summary {
+    background: var(--slate-100); border-radius: 12px; padding: 16px;
+  }
+  .summary h3 {
+    font-size: 13px; font-weight: 700; color: var(--slate-700);
+    margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .summary-body { font-size: 13px; color: var(--slate-600); line-height: 1.8; }
+  .summary-divider { border-top: 1px solid var(--slate-200); margin: 8px 0; padding-top: 8px; }
+  .warn { color: var(--red-500); margin-left: 4px; }
+
+  /* Navigation */
+  .nav { display: flex; justify-content: space-between; margin-top: 24px; gap: 12px; }
+  .btn-prev {
+    padding: 12px 24px; border-radius: 10px; border: 1.5px solid var(--slate-200);
+    background: #fff; color: var(--slate-600); font-weight: 600;
+    font-size: 14px; cursor: pointer; font-family: inherit;
+  }
+  .btn-next {
+    padding: 12px 32px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, var(--blue-mid), var(--blue-bright));
+    color: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
+    font-family: inherit; box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+  }
+  .btn-next:disabled {
+    background: var(--slate-200); color: var(--slate-400);
+    cursor: not-allowed; box-shadow: none;
+  }
+  .btn-submit {
+    padding: 12px 32px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, #059669, var(--green-400));
+    color: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
+    font-family: inherit; box-shadow: 0 4px 12px rgba(16,185,129,0.35);
+  }
+  .btn-submit:disabled { background: var(--slate-400); cursor: wait; }
+
+  /* Success */
+  .success-wrap {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .success-card {
+    background: #fff; border-radius: 24px; padding: 48px 36px; text-align: center;
+    max-width: 380px; width: 100%; box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+  }
+  .success-icon {
+    width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 20px;
+    background: linear-gradient(135deg, var(--green-500), var(--green-400));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; color: #fff;
+  }
+  .success-card h2 { font-size: 21px; font-weight: 800; color: var(--slate-900); margin-bottom: 6px; }
+  .success-card p { color: var(--slate-500); font-size: 14px; margin-bottom: 28px; line-height: 1.5; }
+  .btn-reset {
+    padding: 13px 36px; border-radius: 12px; border: none;
+    background: linear-gradient(135deg, var(--blue-mid), var(--blue-bright));
+    color: #fff; font-weight: 700; font-size: 15px; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(59,130,246,0.35); font-family: inherit;
+  }
+
+  .footer { text-align: center; color: var(--slate-600); font-size: 10px; margin-top: 14px; }
+  .hidden { display: none !important; }
+
+  /* Validation banner */
+  .validation-banner {
+    background: #fef2f2; border: 1.5px solid var(--red-border);
+    color: var(--red-500); padding: 12px 16px; border-radius: 10px;
+    font-size: 13px; font-weight: 600; margin-bottom: 16px;
+    transition: opacity 0.4s ease;
+  }
+  .validation-banner.fade-out { opacity: 0; }
+
+  /* Autosave indicator */
+  .autosave-pill {
+    position: fixed; bottom: 16px; right: 16px;
+    background: rgba(15, 23, 42, 0.9); color: #93c5fd;
+    padding: 8px 14px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    opacity: 0; transition: opacity 0.3s;
+    pointer-events: none; z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  .autosave-pill.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ============ SUCCESS SCREEN ============ -->
+<div id="successScreen" class="success-wrap hidden">
+  <div class="success-card">
+    <div class="success-icon">✓</div>
+    <h2>Verstuurd!</h2>
+    <p>De evaluatie is opgeslagen in Google Sheets.</p>
+    <button class="btn-reset" onclick="resetForm()">Nieuwe evaluatie</button>
+  </div>
+</div>
+
+<!-- ============ MAIN APP ============ -->
+<div id="mainApp" class="container">
+  <div class="header">
+    <div class="header-icon">🎬</div>
+    <h1>Bethel Video Evaluatie</h1>
+    <p>Invullen door de regisseur na de dienst</p>
+  </div>
+
+  <div class="steps" id="stepsBar"></div>
+
+  <div class="card">
+    <!-- STEP 0: Dienst -->
+    <div class="step-content" id="step0">
+      <h2>Dienstgegevens</h2>
+      <div class="field">
+        <label class="field-label">Datum</label>
+        <input type="date" id="datum">
+      </div>
+      <div class="field">
+        <label class="field-label">Soort dienst</label>
+        <select id="soortDienst"><option value="">Kies...</option></select>
+      </div>
+      <div class="field">
+        <label class="field-label">Producer</label>
+        <select id="producer"><option value="">Kies...</option></select>
+      </div>
+      <div class="field">
+        <label class="field-label">Regisseur (jij)</label>
+        <select id="regisseur"><option value="">Kies...</option></select>
+      </div>
+    </div>
+
+    <!-- STEP 1: Camera's -->
+    <div class="step-content hidden" id="step1">
+      <h2>Camera evaluatie</h2>
+      <p class="card-intro">Beoordeel per camera de operator en meld eventuele problemen.</p>
+      <div id="cameraCards"></div>
+    </div>
+
+    <!-- STEP 2: Beeldtechnicus -->
+    <div class="step-content hidden" id="step2">
+      <h2>Beeldtechnicus</h2>
+      <div class="field">
+        <label class="field-label">Beeldtechnicus</label>
+        <select id="beeldtechnicus"><option value="">Kies...</option></select>
+      </div>
+      <div class="field">
+        <label class="field-label">Beoordeling</label>
+        <div class="stars" id="starsBT"></div>
+      </div>
+      <div class="field">
+        <label class="field-label">Opmerkingen</label>
+        <textarea id="opmerkingBT" placeholder="Hoe deed de beeldtechnicus het?" style="min-height:80px"></textarea>
+      </div>
+    </div>
+
+    <!-- STEP 3: Afronden -->
+    <div class="step-content hidden" id="step3">
+      <h2>Afronden</h2>
+      <div class="field">
+        <label class="field-label">Algemene opmerkingen</label>
+        <textarea id="algemeenOpmerking" placeholder="Overige opmerkingen over de dienst..." style="min-height:80px"></textarea>
+      </div>
+      <div class="summary" id="summaryBox"></div>
+    </div>
+
+    <div class="nav">
+      <div id="navLeft"></div>
+      <div id="navRight"></div>
+    </div>
+  </div>
+
+  <p class="footer">Bethel Videoteam &copy; <script>document.write(new Date().getFullYear())</script></p>
+</div>
+
+<script>
+// =============================================
+// CONFIGURATIE - PAS HIER JULLIE NAMEN AAN
+// =============================================
+const CONFIG = {
+  googleScriptUrl: "https://script.google.com/macros/s/AKfycbxur_JPO0C00l3Is0fVAWN1lCMdZTuULgvzOCjSoNtrH93NogNDXVAU61mgqpUOb7nPZA/exec",
+
+  // Deze worden automatisch geladen uit het "Namen" tabblad in de Sheet
+  producers:      [],
+  regisseurs:     [],
+  beeldtechnici:  [],
+  dienstTypes:    [],
+  cameras:        ["C1", "C2", "C3", "C4"],
+  operatorsPerCamera: { "C1": [], "C2": [], "C3": [], "C4": [] },
+};
+
+const STAR_LABELS = ["Onvoldoende", "Matig", "Voldoende", "Goed", "Uitstekend"];
+const STEP_NAMES = ["Dienst", "Camera's", "Beeld", "Afronden"];
+
+let currentStep = 0;
+let camData = {};
+let btRating = 0;
+
+// =============================================
+// INIT
+// =============================================
+async function init() {
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("datum").value = today;
+
+  // Laad namen uit de Google Sheet
+  await loadNamesFromSheet();
+
+  fillSelect("soortDienst", CONFIG.dienstTypes);
+  fillSelect("producer", CONFIG.producers);
+  fillSelect("regisseur", CONFIG.regisseurs);
+  fillSelect("beeldtechnicus", CONFIG.beeldtechnici);
+
+  buildStepsBar();
+  buildCameraCards();
+  buildStars("starsBT", (val) => { btRating = val; saveDebounced(); });
+  updateNav();
+}
+
+async function loadNamesFromSheet() {
+  try {
+    const response = await fetch(CONFIG.googleScriptUrl + "?action=getNames");
+    const data = await response.json();
+    if (data.producers)         CONFIG.producers = data.producers;
+    if (data.regisseurs)        CONFIG.regisseurs = data.regisseurs;
+    if (data.beeldtechnici)     CONFIG.beeldtechnici = data.beeldtechnici;
+    if (data.dienstTypes)       CONFIG.dienstTypes = data.dienstTypes;
+    if (data.operatorsPerCamera) CONFIG.operatorsPerCamera = data.operatorsPerCamera;
+  } catch (err) {
+    console.error("Namen laden mislukt:", err);
+    alert("Kon de namen niet ophalen uit de Sheet. Controleer je internetverbinding.");
+  }
+}
+
+function fillSelect(id, options) {
+  const sel = document.getElementById(id);
+  options.forEach(o => {
+    const opt = document.createElement("option");
+    opt.value = o; opt.textContent = o;
+    sel.appendChild(opt);
+  });
+}
+
+// =============================================
+// STEPS BAR
+// =============================================
+function buildStepsBar() {
+  const bar = document.getElementById("stepsBar");
+  bar.innerHTML = STEP_NAMES.map((name, i) => `
+    <div class="step">
+      <div class="step-bar ${i <= currentStep ? 'active' : ''}" id="stepBar${i}"></div>
+      <span class="step-label ${i <= currentStep ? 'active' : ''}" id="stepLabel${i}">${name}</span>
+    </div>
+  `).join("");
+}
+
+function updateStepsBar() {
+  STEP_NAMES.forEach((_, i) => {
+    document.getElementById(`stepBar${i}`).classList.toggle("active", i <= currentStep);
+    document.getElementById(`stepLabel${i}`).classList.toggle("active", i <= currentStep);
+  });
+}
+
+// =============================================
+// CAMERA CARDS
+// =============================================
+function buildCameraCards() {
+  const container = document.getElementById("cameraCards");
+  CONFIG.cameras.forEach(cam => {
+    camData[cam] = { operator: "", rating: 0, cameraProblem: false, statiefProblem: false, problemText: "", opmerking: "" };
+
+    const card = document.createElement("div");
+    card.className = "cam-card";
+    card.id = `camCard_${cam}`;
+    card.innerHTML = `
+      <div class="cam-header">
+        <div class="cam-badge">${cam}</div>
+        <span class="cam-name">Camera ${cam}</span>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Operator</label>
+        <select id="camOp_${cam}" onchange="camData['${cam}'].operator=this.value">
+          <option value="">Wie zat achter deze camera?</option>
+          ${CONFIG.operatorsPerCamera[cam].map(o => `<option value="${o}">${o}</option>`).join("")}
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Beoordeling operator</label>
+        <div class="stars" id="camStars_${cam}"></div>
+      </div>
+
+      <div class="checks">
+        <label class="check-label" id="checkCam_${cam}_label">
+          <input type="checkbox" id="checkCam_${cam}" onchange="toggleCamProblem('${cam}', 'camera', this.checked)">
+          Probleem camera
+        </label>
+        <label class="check-label" id="checkStat_${cam}_label">
+          <input type="checkbox" id="checkStat_${cam}" onchange="toggleCamProblem('${cam}', 'statief', this.checked)">
+          Probleem statief
+        </label>
+      </div>
+
+      <textarea class="problem-field hidden" id="camProbTxt_${cam}"
+        placeholder="Beschrijf het probleem zo specifiek mogelijk..."
+        oninput="camData['${cam}'].problemText=this.value"></textarea>
+
+      <textarea class="opmerking-area" id="camOpmerking_${cam}"
+        placeholder="Opmerkingen over de operator..."
+        oninput="camData['${cam}'].opmerking=this.value"></textarea>
+    `;
+    container.appendChild(card);
+
+    buildStars(`camStars_${cam}`, (val) => { camData[cam].rating = val; saveDebounced(); });
+  });
+}
+
+function toggleCamProblem(cam, type, checked) {
+  if (type === "camera") camData[cam].cameraProblem = checked;
+  if (type === "statief") camData[cam].statiefProblem = checked;
+
+  const hasAny = camData[cam].cameraProblem || camData[cam].statiefProblem;
+  const card = document.getElementById(`camCard_${cam}`);
+  const txtField = document.getElementById(`camProbTxt_${cam}`);
+
+  card.classList.toggle("has-problem", hasAny);
+  txtField.classList.toggle("hidden", !hasAny);
+
+  // Update label styling
+  document.getElementById(`checkCam_${cam}_label`).classList.toggle("checked", camData[cam].cameraProblem);
+  document.getElementById(`checkStat_${cam}_label`).classList.toggle("checked", camData[cam].statiefProblem);
+
+  saveDebounced();
+}
+
+// =============================================
+// STAR RATING
+// =============================================
+function buildStars(containerId, onChange) {
+  const container = document.getElementById(containerId);
+  let currentVal = 0;
+
+  const render = () => {
+    container.innerHTML = "";
+    for (let i = 1; i <= 5; i++) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = `star-btn ${i <= currentVal ? 'active' : ''}`;
+      btn.textContent = "★";
+      btn.onclick = () => { currentVal = i; onChange(i); render(); };
+      container.appendChild(btn);
+    }
+    const label = document.createElement("span");
+    label.className = "star-label";
+    label.textContent = currentVal ? STAR_LABELS[currentVal - 1] : "";
+    container.appendChild(label);
+  };
+  render();
+}
+
+// =============================================
+// NAVIGATION
+// =============================================
+function updateNav() {
+  const left = document.getElementById("navLeft");
+  const right = document.getElementById("navRight");
+
+  left.innerHTML = currentStep > 0
+    ? `<button class="btn-prev" onclick="goStep(${currentStep - 1})">Vorige</button>`
+    : "";
+
+  if (currentStep < 3) {
+    right.innerHTML = `<button class="btn-next" onclick="goStep(${currentStep + 1})">Volgende</button>`;
+  } else {
+    right.innerHTML = `<button class="btn-submit" onclick="submitForm()">Verstuur evaluatie</button>`;
+  }
+}
+
+function canProceed() { return true; }
+
+function goStep(n) {
+  // Bij vooruit gaan: valideer de huidige stap
+  if (n > currentStep) {
+    const error = validateStep(currentStep);
+    if (error) {
+      showValidationError(error);
+      return;
+    }
+  }
+
+  document.getElementById(`step${currentStep}`).classList.add("hidden");
+  currentStep = n;
+  document.getElementById(`step${currentStep}`).classList.remove("hidden");
+
+  if (currentStep === 3) buildSummary();
+
+  updateStepsBar();
+  updateNav();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function validateStep(step) {
+  if (step === 0) {
+    if (!document.getElementById("datum").value) return "Vul een datum in";
+    if (!document.getElementById("soortDienst").value) return "Kies een soort dienst";
+    if (!document.getElementById("producer").value) return "Kies een producer";
+    if (!document.getElementById("regisseur").value) return "Kies een regisseur";
+  }
+  if (step === 1) {
+    // Per camera: operator + beoordeling verplicht, toelichting bij problemen
+    for (const c of CONFIG.cameras) {
+      const d = camData[c];
+      if (!d.operator) return `${c}: kies wie achter de camera zat`;
+      if (!d.rating) return `${c}: geef een beoordeling (sterren)`;
+      if ((d.cameraProblem || d.statiefProblem) && !d.problemText.trim()) {
+        return `${c}: beschrijf het probleem`;
+      }
+    }
+  }
+  if (step === 2) {
+    if (!document.getElementById("beeldtechnicus").value) return "Kies een beeldtechnicus";
+    if (!btRating) return "Geef een beoordeling voor de beeldtechnicus (sterren)";
+  }
+  return null;
+}
+
+function showValidationError(msg) {
+  // Toon vriendelijke banner bovenaan de kaart
+  let banner = document.getElementById("validationBanner");
+  if (!banner) {
+    banner = document.createElement("div");
+    banner.id = "validationBanner";
+    banner.className = "validation-banner";
+    document.querySelector(".card").prepend(banner);
+  }
+  banner.textContent = "⚠ " + msg;
+  banner.classList.remove("hidden");
+  banner.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  setTimeout(() => { banner.classList.add("fade-out"); }, 10);
+  setTimeout(() => {
+    banner.classList.add("hidden");
+    banner.classList.remove("fade-out");
+  }, 4000);
+}
+
+// =============================================
+// SUMMARY
+// =============================================
+function buildSummary() {
+  const box = document.getElementById("summaryBox");
+  const datum = document.getElementById("datum").value;
+  const dienst = document.getElementById("soortDienst").value;
+  const producer = document.getElementById("producer").value;
+  const regisseur = document.getElementById("regisseur").value;
+  const bt = document.getElementById("beeldtechnicus").value;
+
+  let camLines = CONFIG.cameras.map(c => {
+    const d = camData[c];
+    const stars = d.rating ? "★".repeat(d.rating) : "";
+    let warns = "";
+    if (d.cameraProblem) warns += `<span class="warn">⚠ camera</span>`;
+    if (d.statiefProblem) warns += `<span class="warn">⚠ statief</span>`;
+    return `<div style="margin-bottom:4px"><strong>${c}:</strong> ${d.operator || "–"} ${stars} ${warns}</div>`;
+  }).join("");
+
+  box.innerHTML = `
+    <h3>Samenvatting</h3>
+    <div class="summary-body">
+      <div><strong>Datum:</strong> ${datum}</div>
+      <div><strong>Dienst:</strong> ${dienst}</div>
+      <div><strong>Producer:</strong> ${producer}</div>
+      <div><strong>Regisseur:</strong> ${regisseur}</div>
+      <div class="summary-divider">${camLines}</div>
+      <div class="summary-divider">
+        <strong>Beeldtechnicus:</strong> ${bt || "–"} ${btRating ? "★".repeat(btRating) : ""}
+      </div>
+    </div>
+  `;
+}
+
+// =============================================
+// SUBMIT
+// =============================================
+async function submitForm() {
+  const btn = document.querySelector(".btn-submit");
+  btn.disabled = true;
+  btn.textContent = "Versturen...";
+
+  const payload = {
+    datum: document.getElementById("datum").value,
+    producer: document.getElementById("producer").value,
+    soortDienst: document.getElementById("soortDienst").value,
+    regisseur: document.getElementById("regisseur").value,
+    beeldtechnicus: document.getElementById("beeldtechnicus").value,
+    beoordelingBeeldtechnicus: btRating ? STAR_LABELS[btRating - 1] : "",
+    opmerkingBeeldtechnicus: document.getElementById("opmerkingBT").value,
+    algemeenOpmerking: document.getElementById("algemeenOpmerking").value,
+  };
+
+  CONFIG.cameras.forEach(c => {
+    payload[`${c}_operator`] = camData[c].operator;
+    payload[`${c}_beoordeling`] = camData[c].rating ? STAR_LABELS[camData[c].rating - 1] : "";
+    payload[`${c}_cameraProblemen`] = camData[c].cameraProblem ? "Ja" : "Nee";
+    payload[`${c}_statiefProblemen`] = camData[c].statiefProblem ? "Ja" : "Nee";
+    payload[`${c}_probleemToelichting`] = camData[c].problemText;
+    payload[`${c}_opmerking`] = camData[c].opmerking;
+  });
+
+  try {
+    if (CONFIG.googleScriptUrl !== "JOUW_GOOGLE_SCRIPT_URL_HIER") {
+      await fetch(CONFIG.googleScriptUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
+    console.log("Evaluatie verstuurd:", payload);
+    clearAutosave();
+    document.getElementById("mainApp").classList.add("hidden");
+    document.getElementById("successScreen").classList.remove("hidden");
+  } catch (err) {
+    alert("Versturen mislukt, probeer opnieuw.");
+    btn.disabled = false;
+    btn.textContent = "Verstuur evaluatie";
+  }
+}
+
+// =============================================
+// RESET
+// =============================================
+function resetForm() {
+  document.getElementById("successScreen").classList.add("hidden");
+  document.getElementById("mainApp").classList.remove("hidden");
+
+  currentStep = 0;
+  btRating = 0;
+
+  document.getElementById("datum").value = new Date().toISOString().split("T")[0];
+  document.getElementById("soortDienst").value = "";
+  document.getElementById("producer").value = "";
+  document.getElementById("regisseur").value = "";
+  document.getElementById("beeldtechnicus").value = "";
+  document.getElementById("opmerkingBT").value = "";
+  document.getElementById("algemeenOpmerking").value = "";
+
+  buildStars("starsBT", (val) => { btRating = val; });
+
+  CONFIG.cameras.forEach(c => {
+    camData[c] = { operator: "", rating: 0, cameraProblem: false, statiefProblem: false, problemText: "", opmerking: "" };
+    document.getElementById(`camOp_${c}`).value = "";
+    document.getElementById(`checkCam_${c}`).checked = false;
+    document.getElementById(`checkStat_${c}`).checked = false;
+    document.getElementById(`camProbTxt_${c}`).value = "";
+    document.getElementById(`camProbTxt_${c}`).classList.add("hidden");
+    document.getElementById(`camOpmerking_${c}`).value = "";
+    document.getElementById(`camCard_${c}`).classList.remove("has-problem");
+    document.getElementById(`checkCam_${c}_label`).classList.remove("checked");
+    document.getElementById(`checkStat_${c}_label`).classList.remove("checked");
+    buildStars(`camStars_${c}`, (val) => { camData[c].rating = val; saveDebounced(); });
+  });
+
+  // Show step 0
+  document.querySelectorAll(".step-content").forEach(el => el.classList.add("hidden"));
+  document.getElementById("step0").classList.remove("hidden");
+
+  clearAutosave();
+  updateStepsBar();
+  updateNav();
+}
+
+// =============================================
+// AUTOSAVE (in browser localStorage)
+// =============================================
+const AUTOSAVE_KEY = "bethel_evaluatie_autosave_v1";
+let autosaveTimer = null;
+
+function saveToLocalStorage() {
+  const data = {
+    datum: document.getElementById("datum").value,
+    soortDienst: document.getElementById("soortDienst").value,
+    producer: document.getElementById("producer").value,
+    regisseur: document.getElementById("regisseur").value,
+    beeldtechnicus: document.getElementById("beeldtechnicus").value,
+    btRating: btRating,
+    opmerkingBT: document.getElementById("opmerkingBT").value,
+    algemeenOpmerking: document.getElementById("algemeenOpmerking").value,
+    camData: camData,
+    currentStep: currentStep,
+    savedAt: new Date().toISOString(),
+  };
+  try {
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
+    showAutosavePill();
+  } catch (e) { /* localStorage vol of geblokkeerd */ }
+}
+
+function showAutosavePill() {
+  let pill = document.getElementById("autosavePill");
+  if (!pill) {
+    pill = document.createElement("div");
+    pill.id = "autosavePill";
+    pill.className = "autosave-pill";
+    pill.textContent = "✓ Automatisch opgeslagen";
+    document.body.appendChild(pill);
+  }
+  pill.classList.add("show");
+  clearTimeout(pill._timer);
+  pill._timer = setTimeout(() => pill.classList.remove("show"), 1500);
+}
+
+function loadFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem(AUTOSAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+
+    // Alleen herstellen als het binnen 24 uur is opgeslagen
+    const savedAt = new Date(data.savedAt);
+    const hoursAgo = (Date.now() - savedAt.getTime()) / (1000 * 60 * 60);
+    if (hoursAgo > 24) {
+      localStorage.removeItem(AUTOSAVE_KEY);
+      return false;
+    }
+
+    // Vraag bevestiging
+    const saveTime = savedAt.toLocaleString("nl-NL", {
+      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
+    });
+    const restore = confirm(
+      `Er is een onverzonden evaluatie gevonden van ${saveTime}.\n\nWil je daarmee verder gaan?`
+    );
+    if (!restore) {
+      localStorage.removeItem(AUTOSAVE_KEY);
+      return false;
+    }
+
+    // Herstel de waarden
+    if (data.datum) document.getElementById("datum").value = data.datum;
+    if (data.soortDienst) document.getElementById("soortDienst").value = data.soortDienst;
+    if (data.producer) document.getElementById("producer").value = data.producer;
+    if (data.regisseur) document.getElementById("regisseur").value = data.regisseur;
+    if (data.beeldtechnicus) document.getElementById("beeldtechnicus").value = data.beeldtechnicus;
+    if (data.opmerkingBT) document.getElementById("opmerkingBT").value = data.opmerkingBT;
+    if (data.algemeenOpmerking) document.getElementById("algemeenOpmerking").value = data.algemeenOpmerking;
+
+    if (data.btRating) {
+      btRating = data.btRating;
+      buildStars("starsBT", (val) => { btRating = val; saveDebounced(); });
+      // Herstel visuele sterren
+      const starContainer = document.getElementById("starsBT");
+      if (starContainer) {
+        const buttons = starContainer.querySelectorAll(".star-btn");
+        buttons.forEach((b, i) => b.classList.toggle("active", i < data.btRating));
+        const label = starContainer.querySelector(".star-label");
+        if (label) label.textContent = STAR_LABELS[data.btRating - 1] || "";
+      }
+    }
+
+    if (data.camData) {
+      CONFIG.cameras.forEach(c => {
+        if (data.camData[c]) {
+          camData[c] = data.camData[c];
+          const d = camData[c];
+          document.getElementById(`camOp_${c}`).value = d.operator || "";
+          document.getElementById(`checkCam_${c}`).checked = !!d.cameraProblem;
+          document.getElementById(`checkStat_${c}`).checked = !!d.statiefProblem;
+          document.getElementById(`camProbTxt_${c}`).value = d.problemText || "";
+          document.getElementById(`camOpmerking_${c}`).value = d.opmerking || "";
+          const hasAny = d.cameraProblem || d.statiefProblem;
+          document.getElementById(`camCard_${c}`).classList.toggle("has-problem", hasAny);
+          document.getElementById(`camProbTxt_${c}`).classList.toggle("hidden", !hasAny);
+          document.getElementById(`checkCam_${c}_label`).classList.toggle("checked", !!d.cameraProblem);
+          document.getElementById(`checkStat_${c}_label`).classList.toggle("checked", !!d.statiefProblem);
+          // Herstel sterren visueel
+          if (d.rating) {
+            buildStars(`camStars_${c}`, (val) => { camData[c].rating = val; saveDebounced(); });
+            const sc = document.getElementById(`camStars_${c}`);
+            const buttons = sc.querySelectorAll(".star-btn");
+            buttons.forEach((b, i) => b.classList.toggle("active", i < d.rating));
+            const label = sc.querySelector(".star-label");
+            if (label) label.textContent = STAR_LABELS[d.rating - 1] || "";
+          }
+        }
+      });
+    }
+
+    // Spring naar juiste stap
+    if (data.currentStep) {
+      document.querySelectorAll(".step-content").forEach(el => el.classList.add("hidden"));
+      currentStep = data.currentStep;
+      document.getElementById(`step${currentStep}`).classList.remove("hidden");
+      if (currentStep === 3) buildSummary();
+      updateStepsBar();
+      updateNav();
+    }
+
+    return true;
+  } catch (e) {
+    console.error("Herstel mislukt:", e);
+    return false;
+  }
+}
+
+function saveDebounced() {
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(saveToLocalStorage, 600);
+}
+
+function clearAutosave() {
+  try { localStorage.removeItem(AUTOSAVE_KEY); } catch (e) {}
+}
+
+// Listen for changes on step 0 to update nav, and autosave on any change
+document.addEventListener("change", () => { saveDebounced(); });
+document.addEventListener("input", () => { saveDebounced(); });
+
+// GO
+init().then(() => {
+  // Na init: probeer opgeslagen data te herstellen
+  loadFromLocalStorage();
+});
+</script>
+</body>
+</html>
